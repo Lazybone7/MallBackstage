@@ -4,19 +4,19 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="品牌名" prop="brandName">
-      <el-input v-model="dataForm.brandName" placeholder="品牌名"></el-input>
+    <el-form-item label="系列名" prop="seriesName">
+      <el-input v-model="dataForm.seriesName" placeholder="系列名"></el-input>
     </el-form-item>
-    <el-form-item label="关联分类" prop="catId">
-        <el-select v-model="value" filterable placeholder="请选择"> 
-          <el-option
-            v-for="item in dataForm.catNameList"
-            :key="item.catId"
-            :label="item.catName"
-            :value="item.catId"
-          >
-          </el-option>
-        </el-select>
+    <el-form-item label="关联品牌" prop="brandId">
+      <el-select v-model="value" filterable placeholder="请选择"> 
+        <el-option
+          v-for="item in seriesList"
+          :key="item.seriesId"
+          :label="item.brandName"
+          :value="item.brandId"
+        >
+        </el-option>
+      </el-select>
     </el-form-item>
     <el-form-item label="显示状态" prop="showStatus">
       <el-input v-model="dataForm.showStatus" placeholder="显示状态"></el-input>
@@ -34,21 +34,20 @@
     data () {
       return {
         value:'',
+        seriesList:[],
         visible: false,
         dataForm: {
-          brandId: 0,
-          brandName: '',
-          catId: '',
-          catName: '',
-          showStatus: '',
-          catNameList:[]
+          seriesId: 0,
+          seriesName: '',
+          brandId: '',
+          showStatus: ''
         },
         dataRule: {
-          brandName: [
-            { required: true, message: '品牌名不能为空', trigger: 'blur' }
+          seriesName: [
+            { required: true, message: '系列名不能为空', trigger: 'blur' }
           ],
-          catId: [
-            { required: true, message: '所属分类不能为空', trigger: 'blur' }
+          brandId: [
+            { required: true, message: '品牌名不能为空', trigger: 'blur' }
           ],
           showStatus: [
             { required: true, message: '显示状态不能为空', trigger: 'blur' }
@@ -58,53 +57,58 @@
     },
     methods: {
       init (id) {
-        this.dataForm.brandId = id || 0
+        this.dataForm.seriesId = id || 0
         this.visible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].resetFields()
-          if (this.dataForm.brandId) {
+          if (this.dataForm.seriesId) {
             this.$http({
-              url: this.$http.adornUrl(`/commodity/brand/info/${this.dataForm.brandId}`),
+              url: this.$http.adornUrl(`/commodity/series/info/${this.dataForm.seriesId}`),
               method: 'get',
               params: this.$http.adornParams()
             }).then(({data}) => {
               if (data && data.code === 0) {
-                this.dataForm.brandName = data.brand.brandName
-                this.dataForm.catId = data.brand.catId
-                this.value = data.brand.catId
-                this.dataForm.showStatus = data.brand.showStatus
+                this.dataForm.seriesName = data.series.seriesName
+                this.dataForm.brandId = data.series.brandId
+                this.dataForm.showStatus = data.series.showStatus
+                this.value = data.series.brandName
               }
             })
             this.$http({
-              url: this.$http.adornUrl(`/commodity/category/list`),
+              url: this.$http.adornUrl(`/commodity/brand/list`),
               method: 'get',
-            }).then(({data})=>{
-                this.dataForm.catNameList = data.page.list
-            })  
+              params: this.$http.adornParams()
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                this.seriesList = data.page.list
+              }
+            })
           }
           else{
-              this.$http({
-              url: this.$http.adornUrl(`/commodity/category/list`),
+            this.$http({
+              url: this.$http.adornUrl(`/commodity/brand/list`),
               method: 'get',
-            }).then(({data})=>{
-                this.dataForm.catNameList = data.page.list
-            }) 
+              params: this.$http.adornParams()
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                this.seriesList = data.page.list
+              }
+            })
           }
         })
       },
       // 表单提交
       dataFormSubmit () {
-        this.dataForm.catId = this.value;
-        this.dataForm.catName = this.value;
+        this.dataForm.brandId = this.value;
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
-              url: this.$http.adornUrl(`/commodity/brand/${!this.dataForm.brandId ? 'save' : 'update'}`),
+              url: this.$http.adornUrl(`/commodity/series/${!this.dataForm.seriesId ? 'save' : 'update'}`),
               method: 'post',
               data: this.$http.adornData({
-                'brandId': this.dataForm.brandId || undefined,
-                'brandName': this.dataForm.brandName,
-                'catId': this.dataForm.catId,
+                'seriesId': this.dataForm.seriesId || undefined,
+                'seriesName': this.dataForm.seriesName,
+                'brandId': this.dataForm.brandId,
                 'showStatus': this.dataForm.showStatus
               })
             }).then(({data}) => {
@@ -114,6 +118,7 @@
                   type: 'success',
                   duration: 1500,
                   onClose: () => {
+                    this.value=''
                     this.visible = false
                     this.$emit('refreshDataList')
                   }

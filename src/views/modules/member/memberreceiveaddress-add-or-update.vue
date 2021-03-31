@@ -4,26 +4,17 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="" prop="accountName">
-      <el-input v-model="dataForm.accountName" placeholder=""></el-input>
+    <el-form-item label="" prop="memberId">
+      <el-input v-model="dataForm.memberId" placeholder=""></el-input>
     </el-form-item>
-    <el-form-item label="" prop="password">
-      <el-input v-model="dataForm.password" placeholder=""></el-input>
-    </el-form-item>
-    <el-form-item label="" prop="nickName">
-      <el-input v-model="dataForm.nickName" placeholder=""></el-input>
+    <el-form-item label="" prop="name">
+      <el-input v-model="dataForm.name" placeholder=""></el-input>
     </el-form-item>
     <el-form-item label="" prop="phoneNum">
       <el-input v-model="dataForm.phoneNum" placeholder=""></el-input>
     </el-form-item>
-    <el-form-item label="" prop="img">
-      <el-input v-model="dataForm.img" placeholder=""></el-input>
-    </el-form-item>
-    <el-form-item label="" prop="gender">
-      <el-input v-model="dataForm.gender" placeholder=""></el-input>
-    </el-form-item>
-    <el-form-item label="" prop="birth">
-      <el-input v-model="dataForm.birth" placeholder=""></el-input>
+    <el-form-item label="" prop="postCode">
+      <el-input v-model="dataForm.postCode" placeholder=""></el-input>
     </el-form-item>
     <el-form-item label="" prop="province">
       <el-input v-model="dataForm.province" placeholder=""></el-input>
@@ -34,8 +25,11 @@
     <el-form-item label="" prop="region">
       <el-input v-model="dataForm.region" placeholder=""></el-input>
     </el-form-item>
-    <el-form-item label="" prop="job">
-      <el-input v-model="dataForm.job" placeholder=""></el-input>
+    <el-form-item label="" prop="detailAddress">
+      <el-input v-model="dataForm.detailAddress" placeholder=""></el-input>
+    </el-form-item>
+    <el-form-item label="" prop="defaultStatus">
+      <el-input v-model="dataForm.defaultStatus" placeholder=""></el-input>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -52,38 +46,27 @@
         visible: false,
         dataForm: {
           id: 0,
-          accountName: '',
-          password: '',
-          nickName: '',
+          memberId: '',
+          name: '',
           phoneNum: '',
-          img: '',
-          gender: '',
-          birth: '',
+          postCode: '',
           province: '',
           city: '',
           region: '',
-          job: ''
+          detailAddress: '',
+          defaultStatus: ''
         },
         dataRule: {
-          accountName: [
+          memberId: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ],
-          password: [
-            { required: true, message: '不能为空', trigger: 'blur' }
-          ],
-          nickName: [
+          name: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ],
           phoneNum: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ],
-          img: [
-            { required: true, message: '不能为空', trigger: 'blur' }
-          ],
-          gender: [
-            { required: true, message: '不能为空', trigger: 'blur' }
-          ],
-          birth: [
+          postCode: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ],
           province: [
@@ -95,7 +78,10 @@
           region: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ],
-          job: [
+          detailAddress: [
+            { required: true, message: '不能为空', trigger: 'blur' }
+          ],
+          defaultStatus: [
             { required: true, message: '不能为空', trigger: 'blur' }
           ]
         }
@@ -109,22 +95,20 @@
           this.$refs['dataForm'].resetFields()
           if (this.dataForm.id) {
             this.$http({
-              url: this.$http.adornUrl(`/springboot/member/info/${this.dataForm.id}`),
+              url: this.$http.adornUrl(`/springboot/memberreceiveaddress/info/${this.dataForm.id}`),
               method: 'get',
               params: this.$http.adornParams()
             }).then(({data}) => {
               if (data && data.code === 0) {
-                this.dataForm.accountName = data.member.accountName
-                this.dataForm.password = data.member.password
-                this.dataForm.nickName = data.member.nickName
-                this.dataForm.phoneNum = data.member.phoneNum
-                this.dataForm.img = data.member.img
-                this.dataForm.gender = data.member.gender
-                this.dataForm.birth = data.member.birth
-                this.dataForm.province = data.member.province
-                this.dataForm.city = data.member.city
-                this.dataForm.region = data.member.region
-                this.dataForm.job = data.member.job
+                this.dataForm.memberId = data.memberReceiveAddress.memberId
+                this.dataForm.name = data.memberReceiveAddress.name
+                this.dataForm.phoneNum = data.memberReceiveAddress.phoneNum
+                this.dataForm.postCode = data.memberReceiveAddress.postCode
+                this.dataForm.province = data.memberReceiveAddress.province
+                this.dataForm.city = data.memberReceiveAddress.city
+                this.dataForm.region = data.memberReceiveAddress.region
+                this.dataForm.detailAddress = data.memberReceiveAddress.detailAddress
+                this.dataForm.defaultStatus = data.memberReceiveAddress.defaultStatus
               }
             })
           }
@@ -135,21 +119,19 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
-              url: this.$http.adornUrl(`/springboot/member/${!this.dataForm.id ? 'save' : 'update'}`),
+              url: this.$http.adornUrl(`/springboot/memberreceiveaddress/${!this.dataForm.id ? 'save' : 'update'}`),
               method: 'post',
               data: this.$http.adornData({
                 'id': this.dataForm.id || undefined,
-                'accountName': this.dataForm.accountName,
-                'password': this.dataForm.password,
-                'nickName': this.dataForm.nickName,
+                'memberId': this.dataForm.memberId,
+                'name': this.dataForm.name,
                 'phoneNum': this.dataForm.phoneNum,
-                'img': this.dataForm.img,
-                'gender': this.dataForm.gender,
-                'birth': this.dataForm.birth,
+                'postCode': this.dataForm.postCode,
                 'province': this.dataForm.province,
                 'city': this.dataForm.city,
                 'region': this.dataForm.region,
-                'job': this.dataForm.job
+                'detailAddress': this.dataForm.detailAddress,
+                'defaultStatus': this.dataForm.defaultStatus
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
